@@ -1,0 +1,72 @@
+创建数据库文件
+--------------------------------------------------------------------------------------------
+
+CREATE TABLE `geolife` (
+	`id` int(11) NOT NULL AUTO_INCREMENT,
+	`user_id` int(11) DEFAULT NULL,
+	`latitude` double DEFAULT NULL,
+	`longitude` double DEFAULT NULL,
+	`flag` int(11) DEFAULT NULL,
+	`altitude` double DEFAULT NULL,
+	`passed_time` int(11) DEFAULT NULL,
+	`gps_date` date DEFAULT NULL,
+	`gps_time` time DEFAULT NULL,
+	`gps_datetime` timestamp NULL DEFAULT NULL,
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+ 
+CREATE TABLE `staypoint` (
+  	`id` int(11) NOT NULL AUTO_INCREMENT,
+  	`user_id` int(11) DEFAULT NULL,
+  	`arrival_timestamp` int(11) DEFAULT NULL,
+  	`leaving_timestamp` int(11) DEFAULT NULL,
+	`mean_coordinate_latitude` double DEFAULT NULL,
+	`mean_coordinate_longtitude` double DEFAULT NULL,
+	`formatted_address` varchar(255) DEFAULT NULL,
+	`business` varchar(255) DEFAULT NULL,
+	`province` varchar(20) DEFAULT NULL,
+ 	`city` varchar(20) DEFAULT NULL,
+	`district` varchar(20) DEFAULT NULL,
+	`street` varchar(20) DEFAULT NULL,
+	`poi_address` varchar(255) DEFAULT NULL,
+	`poi_name` varchar(255) DEFAULT NULL,
+	`poi_type` varchar(20) DEFAULT NULL,
+	`poi_distance` int(11) DEFAULT NULL,
+	`poi_uid` varchar(255) DEFAULT NULL,
+	`poi_alias` varchar(20) DEFAULT NULL,
+  	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+
+导入数据库
+bash（mac上注意将bash版本升级至4.0以上），将该文件放入Data文件夹下面，替换代码中大写字母代表的配置信息
+--------------------------------------------------------------------------------------------
+
+#!/bin/bash                                                                     
+ 
+shopt -s globstar
+ 
+for file in **/*.plt
+do
+    if [[ ! -f "$file" ]]
+    then
+        continue
+    fi 
+    echo "$file"
+    # Do something else.                                                          
+     
+    rm geolife.txt
+    ln -s "$file" "geolife.txt"
+    cols="latitude, longitude, @flag, altitude, passed_time, gps_date, gps_time) SET user_id = '${file:0:3}', flag=(@flag"
+    mysqlimport -i -s --local --user=USER --password=PASSWORD --fields-terminated-by="," --lines-terminated-by="\r\n" --ignore-lines=6 --columns="$cols" DB_NAME geolife.txt 
+done
+
+
+
+
+得到完整的时间数据
+--------------------------------------------------------------------------------------------
+
+update geolife set gps_datetime = CONCAT(gps_date, ' ', gps_time);
+
