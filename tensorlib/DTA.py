@@ -75,6 +75,3 @@ def eigwrapper(arr, n):
         newv = numpy.concatenate((newv, v[:,ind[i]].reshape([len(arr), 1])),axis = 1);
     
     return (neww,newv);
-    
-    
-    
