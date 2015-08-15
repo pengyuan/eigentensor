@@ -95,7 +95,7 @@ def init_data(region, filter_count, train_percent=1):
     return train_data, axis_users, axis_pois, check_data
 
 
-def init_data_by_user(users, filter_count, train_percent=1, split_percent=1, filter_poi_count=0):
+def init_data_by_user(users, filter_count, train_percent=1):
     conn = MySQLdb.connect(host=settings.HOST, user=settings.USER, passwd=settings.PASSWORD, db=settings.DB)
     cursor = conn.cursor()
     result = 0
@@ -119,28 +119,22 @@ def init_data_by_user(users, filter_count, train_percent=1, split_percent=1, fil
         raise "没有足够数据"
     print user_available
 
-    db_data = {}
     try:
         if len(user_available) == 1:
             sql = "select user_id, arrival_timestamp, poi_name from staypoint where user_id = "+str(user_available[0])+" order by id"
         else:
-            for user in user_available:
-                sql = "select user_id, arrival_timestamp, poi_name from staypoint where user_id in "+tuple(user_available).__str__()+" order by id"
-                print sql
-                result = cursor.execute(sql)
-                result = cursor.fetchall()
-                conn.commit()
+            sql = "select user_id, arrival_timestamp, poi_name from staypoint where user_id in "+tuple(user_available).__str__()+" order by id"
+        print sql
+        result = cursor.execute(sql)
+        result = cursor.fetchall()
+        conn.commit()
     except Exception, e:
         print e
         conn.rollback()
     cursor.close()
     conn.close()
 
-    if split_percent < 1:
-        length = len(result) * split_percent
-        result = result[:length]
     print result
-
     poi_set = set()
     user_set = set()
     for item in result:
