@@ -17,7 +17,7 @@ DB = "markov2tensor"
 TIME_SLICE = 2
 
 # 迭代次数
-ITERATOR_NUMBER = 50
+ITERATOR_NUMBER = 20
 
 # 迭代误差上限
 ITERATOR_TOLERANCE = 1e-20

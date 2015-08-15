@@ -26,6 +26,7 @@ if __name__ == '__main__':
     x_values = []
     y_values1 = []
     y_values2 = []
+    y_values3 = []
 
     while train_percent < 1:
         data, axis_users, axis_pois, check_data = init_data(region, filter_count, train_percent)
@@ -41,6 +42,9 @@ if __name__ == '__main__':
         # print res
 
         check_tensor = get_check_tensor(check_data, user_num, time_num, poi_num)
+
+
+
         residual1 = delta_tensor_norm(res1, check_tensor)
 
         tensor_stream_res = tensor_stream(data, user_num, poi_num, 10)
@@ -67,15 +71,20 @@ if __name__ == '__main__':
         # print check_tensor
         residual2 = delta_tensor_norm(nor_res, check_tensor)
 
+        statistic_res = get_check_tensor(data, user_num, time_num, poi_num)
+        residual3 = delta_tensor_norm(statistic_res, check_tensor)
+
         x_values.append(train_percent)
         y_values1.append(residual1)
         y_values2.append(residual2)
-        train_percent += 0.1
+        y_values3.append(residual3)
+        train_percent += 0.2
 
     pylab.plot(x_values, y_values1, 'rs', linewidth=1, linestyle="-", label=u"MTT")
     pylab.plot(x_values, y_values2, 'ks', linewidth=1, linestyle="-", label=u"DTA")
+    pylab.plot(x_values, y_values3, 'gs', linewidth=1, linestyle="-", label=u"Baseline")
     pylab.xlabel(u"训练集比重")
-    pylab.ylabel(u"准确率")
+    pylab.ylabel(u"平均误差")
     pylab.title(u"训练集比重与平均误差的关系")
     pylab.legend(loc='center right')
     pylab.show()

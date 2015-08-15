@@ -8,8 +8,8 @@ import random
 from mayavi import mlab
 import numpy
 import settings
-from utils.correlation import correlation
-from utils.sequence import init_data, intersect_sequence
+from utils.correlation import correlation, nmi
+from utils.sequence import init_data, intersect_sequence, alignment_sequence
 from utils.tensor import sparsity, normalize, build_six_order_transition_tensor, shifted_tensor_three_mode_product, \
     check_six_order_transition_tensor, tensor_three_mode_product, validate_eigen_tensor, three_order_tensor_first_norm, \
     three_tensor_hadarmard
@@ -23,6 +23,7 @@ def get_correlation_matrix(data, user_num):
             print data[i], data[j]
             seq_a, seq_b = intersect_sequence(data[i], data[j])
             if seq_a and seq_b:
+                seq_a, seq_b = alignment_sequence(seq_a, seq_b)
                 length = min(len(seq_a), len(seq_b))
                 seq_a_cor = []
                 seq_b_cor = []
@@ -31,7 +32,13 @@ def get_correlation_matrix(data, user_num):
                     seq_b_cor.append(seq_b[k][1])
                 # print str(i)+"与"+str(j)+"的互相关系数: "+str(numpy.corrcoef([seq_a_cor, seq_b_cor]))
                 # print str(i)+"与"+str(j)+"的互相关系数: "+str(correlation(seq_a_cor, seq_b_cor))
-                correlation_matrix[i][j] = abs(correlation(seq_a_cor, seq_b_cor))
+                cor = correlation(seq_a_cor, seq_b_cor)
+                if cor > 0:
+                    correlation_matrix[i][j] = cor
+                else:
+                    correlation_matrix[i][j] = 0
+                #correlation_matrix[i][j] = nmi(numpy.array(seq_a_cor), numpy.array(seq_b_cor))
+
             else:
                 correlation_matrix[i][j] = 0
     return correlation_matrix

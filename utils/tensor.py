@@ -200,6 +200,20 @@ def three_order_tensor_max_norm(tensor):
 
 
 # 张量二模乘
+def tensor_two_mode_tensor(transition_tensor, init_tensor):
+    time_num = len(init_tensor)
+    poi_num = len(init_tensor[0])
+    res = [[0 for i in range(poi_num)] for j in range(time_num)]
+    for i in range(time_num):
+        for j in range(poi_num):
+            res[i][j] = 0
+            for k in range(time_num):
+                for l in range(poi_num):
+                    res[i][j] += transition_tensor[k][l][i][j] * init_tensor[k][l]
+    return res
+
+
+# 张量二模乘
 def tensor_two_mode_product(transition_tensor, init_tensor):
     time_num = len(init_tensor)
     poi_num = len(init_tensor[0])
@@ -225,6 +239,24 @@ def tensor_two_mode_product(transition_tensor, init_tensor):
 
     # if index == settings.ITERATOR_NUMBER:
     #     raise "无法收敛"
+
+    return res
+
+
+# 张量三模乘
+def tensor_mode_tensor(tensor, init_tensor):
+    user_num = len(init_tensor)
+    time_num = len(init_tensor[0])
+    poi_num = len(init_tensor[0][0])
+    res = [[[0 for i in range(poi_num)] for j in range(time_num)] for k in range(user_num)]
+    for i in range(user_num):
+        for j in range(time_num):
+            for k in range(poi_num):
+                res[i][j][k] = 0
+                for l in range(user_num):
+                    for m in range(time_num):
+                        for n in range(poi_num):
+                            res[i][j][k] += tensor[l][m][n][i][j][k] * init_tensor[l][m][n]
 
     return res
 
@@ -257,13 +289,53 @@ def tensor_three_mode_product(tensor, init_tensor):
                         init_tensor[i][j][k] = res[i][j][k]
 
         iterator__values[index] = delta
+        index += 1
+    # if index == settings.ITERATOR_NUMBER:
+    #     raise "无法收敛"
 
+    return res, iterator__values
+
+
+# 张量三模乘迭代中范数的变化
+def tensor_three_mode_product_with_norm(tensor, init_tensor):
+    iterator__values = {}
+    norms = {}
+    user_num = len(init_tensor)
+    time_num = len(init_tensor[0])
+    poi_num = len(init_tensor[0][0])
+    index = 1
+    res = [[[0 for i in range(poi_num)] for j in range(time_num)] for k in range(user_num)]
+    while index <= settings.ITERATOR_NUMBER:
+        for i in range(user_num):
+            for j in range(time_num):
+                for k in range(poi_num):
+                    res[i][j][k] = 0
+                    for l in range(user_num):
+                        for m in range(time_num):
+                            for n in range(poi_num):
+                                res[i][j][k] += tensor[l][m][n][i][j][k] * init_tensor[l][m][n]
+        norm_one = three_order_tensor_first_norm(res)
+        norm_two = three_order_tensor_second_norm(res)
+        norm_three = three_order_tensor_max_norm(res)
+
+        delta = delta_tensor_norm(init_tensor, res)
+        print "index:"+str(index)+",delta:"+str(delta)
+        if delta < settings.ITERATOR_TOLERANCE:
+            break
+        else:
+            for i in range(user_num):
+                for j in range(time_num):
+                    for k in range(poi_num):
+                        init_tensor[i][j][k] = res[i][j][k]
+
+        iterator__values[index] = delta
+        norms[index] = (norm_one, norm_two, norm_three)
         index += 1
 
     # if index == settings.ITERATOR_NUMBER:
     #     raise "无法收敛"
 
-    return res, iterator__values
+    return res, iterator__values, norms
 
 
 # 张量三模乘
@@ -331,8 +403,47 @@ def fouth_order_tensor_stochasticity(tensor, poi_num, zero_adjustment):
     return tensor
 
 
+# 随机性修正 (stochasticity adjustment)
+def transition_matrix_stochasticity(matrix, zero_adjustment):
+    time_num = settings.TIME_SLICE
+    for i in range(time_num):
+        sum = 0
+        for j in range(time_num):
+            sum += matrix[i][j]
+        if sum > 0:
+            for j in range(time_num):
+                    matrix[i][j] = matrix[i][j] / sum
+        else:
+            if zero_adjustment:
+                for j in range(time_num):
+                    matrix[i][j] = 1 / time_num
+    return matrix
+
+
+# 构建时间序列转移矩阵
+def build_time_transition_matrix(temp, zero_adjustment=True):
+    matrix = [[0 for time_to in range(settings.TIME_SLICE)] for time_from in range(settings.TIME_SLICE)]
+    for temp_index in range(len(temp)-1):
+        from_state = temp[temp_index]
+        to_state = temp[temp_index+1]
+        matrix[from_state[0]][to_state[0]] += 1
+        temp_index += 1
+    return transition_matrix_stochasticity(matrix, zero_adjustment)
+
+
+# 构建地点序列转移矩阵
+def build_location_transition_matrix(temp, poi_num, zero_adjustment=True):
+    matrix = [[0 for poi_to in range(poi_num)] for poi_from in range(poi_num)]
+    for temp_index in range(len(temp)-1):
+        from_state = temp[temp_index]
+        to_state = temp[temp_index+1]
+        matrix[from_state[1]][to_state[1]] += 1
+        temp_index += 1
+    return transition_matrix_stochasticity(matrix, zero_adjustment)
+
+
 # 构建某用户序列（时间，地点）转移张量
-def build_fouth_order_transition_tensor(temp, poi_num, zero_adjustment):
+def build_fouth_order_transition_tensor(temp, poi_num, zero_adjustment=True):
     tensor = [[[[0 for poi_to in range(poi_num)] for time_to in range(settings.TIME_SLICE)] for poi_from in range(poi_num)] for time_from in range(settings.TIME_SLICE)]
     for temp_index in range(len(temp)-1):
         from_state = temp[temp_index]
@@ -366,16 +477,16 @@ def build_six_order_transition_tensor(data, poi_num, nor_cor_matrix, zero_adjust
 # 构建用户A序列对用户B序列的（时间，地点）影响力张量
 def build_fouth_order_influence_tensor(sequence_a, sequence_b, poi_num, zero_adjustment):
     tensor = [[[[0 for poi_to in range(poi_num)] for time_to in range(settings.TIME_SLICE)] for poi_from in range(poi_num)] for time_from in range(settings.TIME_SLICE)]
-    for i in range(len(sequence_a)):
-        temp_from = sequence_a[i][2]
-        temp_to = None
-        for j in range(len(sequence_b)):
+    for i in range(len(sequence_b)):
+        temp_to = sequence_b[i][2]
+        temp_from = None
+        for j in range(len(sequence_a)):
             # if sequence_b[j][2] > temp_from:
-            if (sequence_b[j][2] > temp_from) and (sequence_b[j][2] - sequence_a[i][2] < 24*60*60):
-                temp_to = sequence_b[j][2]
+            if (sequence_a[j][2] < temp_to) and ((temp_to - sequence_a[j][2]) < 24*60*60):
+                temp_from = sequence_a[j][2]
                 break
-        if temp_to:
-            tensor[sequence_a[i][0]][sequence_a[i][1]][sequence_b[j][0]][sequence_b[j][1]] += 1
+        if temp_from:
+            tensor[sequence_a[j][0]][sequence_a[j][1]][sequence_b[i][0]][sequence_b[i][1]] += 1
         else:
             continue
     return fouth_order_tensor_stochasticity(tensor, poi_num, zero_adjustment)

@@ -123,6 +123,42 @@ def eigwrappertest():
     print ans2
 
 
+# 得到数据序列
+def data_stream(data, user_num, poi_num, time_interval):
+    data_stream = []
+    min_time = data[0][0][2]
+    max_time = data[0][0][2]
+    for key in data.keys():
+        for item in data[key]:
+            if min_time > item[2]:
+                min_time = item[2]
+            if item[2] > max_time:
+                max_time = item[2]
+    print min_time, max_time
+    increment = 24 * 60 * 60 * time_interval
+    start = int(min_time / increment)
+    end = int(max_time / increment)
+    if max_time % increment > 0:
+        end += 1
+
+    print "total "+str(end - start)+" days"
+
+    for time_index in range(start, end):
+        data_block = {}
+        begin = time_index * increment
+        end = (time_index + 1) * increment
+        for key in data.keys():
+            data_block[key] = []
+            for item in data[key]:
+                if begin <= item[2] <= end:
+                    data_block[key].append(item)
+        if len(data_block.keys()) > 0:
+            data_stream.append(data_block)
+        # else:
+            # tensor_stream.append(None)
+    return data_stream
+
+
 # 得到张量序列
 def tensor_stream(data, user_num, poi_num, time_interval):
     tensor_stream = []
