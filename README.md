@@ -12,6 +12,7 @@
 ## 特征张量的可视化
 |![张量](./benchmark/figure_42.png)|![张量](./benchmark/figure_41.png)|
 |:-|:-|
+
 |![张量](./benchmark/figure_12.png)|![张量](./benchmark/figure_13.png)|
 |:-|:-|
 |![张量](./benchmark/figure_14.png)|![张量](./benchmark/figure_15.png)|
@@ -19,6 +20,7 @@
 
 ## 不同因素组合在各个参数下的准确率
 ![特征张量的可视化](./benchmark/figure_20.png)
+
 |![张量](./benchmark/figure_25.png)|![张量](./benchmark/figure_24.png)|
 |:-|:-|
 |![张量](./benchmark/figure_23.png)|![张量](./benchmark/figure_22.png)|
