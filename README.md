@@ -1,12 +1,11 @@
 # 多元转移张量与特征张量
 
 ## POI(Point Of Interest)数据统计
-![张量](./benchmark/figure_1.png) ![张量](./benchmark/figure_2.png)
+| ![张量](./benchmark/figure_1.png) | ![张量](./benchmark/figure_2.png) |
+|:-|:-|
 
 ## 幂法迭代中不同参数条件下的收敛情况
-<div align="center">
 ![张量](./benchmark/figure_3.png)![张量](./benchmark/figure_4.png) ![张量](./benchmark/figure_6.png)![张量](./benchmark/figure_9.png)
-</div>
 
 ## 特征张量的可视化
 ![特征张量的可视化](./benchmark/figure_42.png) ![特征张量的可视化](./benchmark/figure_41.png)
