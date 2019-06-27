@@ -1,19 +1,22 @@
 #!/usr/bin/env python
 # coding: UTF-8
 from __future__ import division
-import numpy as np
-# from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
-from build.multivariate_transition_tensor import mtt
-import settings
-from utils.sequence import init_data, init_data_by_user
-from utils.tensor import tensor_three_mode_product, delta_tensor_norm, get_check_tensor, inreducible_tensor
-import matplotlib.cm as cmx
-from mpl_toolkits.mplot3d import Axes3D
 
 import matplotlib.cm as cmx
+import matplotlib.cm as cmx
+# from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
-def scatter3d(x,y,z, cs, colorsMap='jet'):
+from mpl_toolkits.mplot3d import Axes3D
+
+import settings
+from build.multivariate_transition_tensor import mtt
+from utils.sequence import init_data, init_data_by_user
+from utils.tensor import tensor_three_mode_product, delta_tensor_norm, get_check_tensor, inreducible_tensor
+
+
+def scatter3d(x, y, z, cs, colorsMap='jet'):
     cm = plt.get_cmap(colorsMap)
     print min(cs), max(cs)
     # cNorm = plt.matplotlib.colors.Normalize(vmin=min(cs), vmax=max(cs))
@@ -25,6 +28,7 @@ def scatter3d(x,y,z, cs, colorsMap='jet'):
     scalarMap.set_array(cs)
     fig.colorbar(scalarMap)
     plt.show()
+
 
 if __name__ == '__main__':
     # beijing = (39.433333, 41.05, 115.416667, 117.5)
@@ -43,11 +47,13 @@ if __name__ == '__main__':
     y_values3 = []
     #
     # # data, axis_users, axis_pois, check_data = init_data(region, filter_count, train_percent)
-    data, axis_users, axis_pois, check_data = init_data_by_user(tuple([0, 3]), filter_count, train_percent, split_percent, filter_poi_count)
+    data, axis_users, axis_pois, check_data = init_data_by_user(tuple([0, 3]), filter_count, train_percent,
+                                                                split_percent, filter_poi_count)
     user_num = len(axis_users)
     poi_num = len(axis_pois)
 
-    init_tensor = [[[1/(poi_num * time_num * user_num) for i in range(poi_num)] for j in range(time_num)] for k in range(user_num)]
+    init_tensor = [[[1 / (poi_num * time_num * user_num) for i in range(poi_num)] for j in range(time_num)] for k in
+                   range(user_num)]
     transition_tensor = inreducible_tensor(mtt(data, user_num, poi_num), user_num, time_num, poi_num, alpha)
     res, iterator_values = tensor_three_mode_product(transition_tensor, init_tensor)
 
@@ -62,7 +68,6 @@ if __name__ == '__main__':
                 y.append(j)
                 z.append(k)
                 value.append(res[i][j][k])
-
 
     # cm = plt.get_cmap("RdYlGn")
     # x = np.random.rand(30)
@@ -93,4 +98,3 @@ if __name__ == '__main__':
     # ax.set_zlabel(u'地点')
     #
     # plt.show()
-
