@@ -18,13 +18,12 @@
 |![张量](./benchmark/figure_14.png)|![张量](./benchmark/figure_15.png)|
 |:-|:-|
 
-## 不同因素组合在各个参数下的准确率
-![特征张量的可视化](./benchmark/figure_20.png)
-
+## 不同因素组合在各个参数下的预测波动(上下界和均值)
 |![张量](./benchmark/figure_25.png)|![张量](./benchmark/figure_24.png)|
 |:-|:-|
 |![张量](./benchmark/figure_23.png)|![张量](./benchmark/figure_22.png)|
 |:-|:-|
 
-## 不同因素组合的多次预测准确率的分位数
-![特征张量的可视化](./benchmark/figure_29.png)
+## 不同因素组合在各个参数下的准确率
+|![张量](./benchmark/figure_20.png)|![张量](./benchmark/figure_29.png)|
+|:-|:-|
